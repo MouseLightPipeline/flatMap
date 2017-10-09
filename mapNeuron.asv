@@ -37,8 +37,6 @@ pixPoints = pixPoints(indHit,:);
 
 %% Process per hemisphere for symmetry.
 swcHemi = [];
-swcHemi.left = [];
-swcHemi.right = [];
 for iHemi = {'left','right'}
     % Select nodes on hemisphere.
     switch iHemi{:}
@@ -51,39 +49,10 @@ for iHemi = {'left','right'}
     fprintf('\nTransforming points for %s hemisphere',iHemi{:});
     for iNode = 1:size(nodeList,1)
         cNode = nodeList(iNode);
-        switch iHemi{:}
-            case 'left'
-                [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(cNode,2), pixPoints(cNode,3),...
-                        Param.coeff1, Param.coeff2, Param.points3d, lap);
-            case 'right'
-                 [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(cNode,2), 569.5-(pixPoints(cNode,3)-569.5),...
-                        Param.coeff1, Param.coeff2, Param.points3d, lap);               
-                    xr = (-xr );
-            end
-        swcHemi.(iHemi{:}) = [ swcHemi.(iHemi{:}) ; swc(cNode,1:2) xr, yr,zr, swc(cNode,6:7) ];
-    end
-    %% reformat swc info.
-    swcHemi.(iHemi{:})(:,8) = swcHemi.(iHemi{:})(:,1); %store original node Id.
-    swcHemi.(iHemi{:})(:,1) = [1:size(swcHemi.(iHemi{:}),1)]';
-    for iNode = 1:size(swcHemi.(iHemi{:}),1)
-       ind = find(swcHemi.(iHemi{:})(:,8) == swcHemi.(iHemi{:})(iNode,7));
-       if ~isempty(ind)
-        swcHemi.(iHemi{:})(iNode,7) = swcHemi.(iHemi{:})(ind,1);
-       else
-           swcHemi.(iHemi{:})(iNode,7) =-1;
-       end
+        [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(nodeList(cNode),2), pixPoints(nodeList(cNode),3),...
+                Param.coeff1, Param.coeff2, Param.points3d, lap);
+        
+        swc(iNode,3:5) = [ xr, yr,zr ];
     end
 end
 
-hFig = figure;
-hAx = axes;
-hAx.DataAspectRatio = [1,1,1];
-scatter(swcHemi.left(:,3),swcHemi.left(:,4),3,'filled');
-hold on
-scatter(swcHemi.right(:,3),swcHemi.right(:,4),3,'filled');
-
-% hFig = figure;
-% hAx = axes;
-% hAx.DataAspectRatio = [1,1,1];
-% plotSwcFast2D(swcHemi.left,[1,2]); hold on
-% plotSwcFast2D(swcHemi.right,[1,2]); hold on
