@@ -53,12 +53,12 @@ for iHemi = {'left','right'}
         cNode = nodeList(iNode);
         switch iHemi{:}
             case 'left'
-                [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(cNode,2), pixPoints(cNode,3),...
+                [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(cNode,2), size(lap,3)-pixPoints(cNode,3),... % you do mimus the total X lenngth because the direction of the dimenions is reversed (low is left hemisphere and high is right hemisphere)
                         Param.coeff1, Param.coeff2, Param.points3d, lap);
             case 'right'
-                 [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(cNode,2), 569.5-(pixPoints(cNode,3)-569.5),...
-                        Param.coeff1, Param.coeff2, Param.points3d, lap);               
-                    xr = (-xr );
+                [ xr, yr,zr ] = transformAllenPix2Flat( pixPoints(cNode,1), pixPoints(cNode,2), pixPoints(cNode,3),...
+                        Param.coeff1, Param.coeff2, Param.points3d, lap);             
+                xr = (-xr );
             end
         swcHemi.(iHemi{:}) = [ swcHemi.(iHemi{:}) ; swc(cNode,1:2) xr, yr,zr, swc(cNode,6:7) ];
     end
@@ -78,12 +78,25 @@ end
 hFig = figure;
 hAx = axes;
 hAx.DataAspectRatio = [1,1,1];
-scatter(swcHemi.left(:,3),swcHemi.left(:,4),3,'filled');
+imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
+hAx.YDir = 'normal';
+scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,'white','filled');
 hold on
-scatter(swcHemi.right(:,3),swcHemi.right(:,4),3,'filled');
+scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,'white','filled');
+export_fig(hFig,'Z:\Chip_analysis\AA0100 flatmap.png','m4')
 
-% hFig = figure;
-% hAx = axes;
-% hAx.DataAspectRatio = [1,1,1];
-% plotSwcFast2D(swcHemi.left,[1,2]); hold on
-% plotSwcFast2D(swcHemi.right,[1,2]); hold on
+hFig = figure;
+hAx = axes;
+hAx.DataAspectRatio = [1,1,1];
+scatter(swc(:,5),swc(:,3),3,'filled');
+hAx.YDir ='reverse';
+
+hFig = figure;
+hAx = axes;
+hAx.DataAspectRatio = [1,1,1];
+plotSwcFast2D(swcHemi.left,[1,2]); hold on
+plotSwcFast2D(swcHemi.right,[1,2]); hold on
+
+figure
+imshow(lap(:,:,100),[]);
+
