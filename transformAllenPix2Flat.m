@@ -33,6 +33,13 @@ a_const2 = coeff2(1428) + coeff2(1429)*a + ...
 % yr = ((a_const2+sum2)+1)*500;
 xr = (a_const1+sum1);
 yr = (a_const2+sum2);
+% add rotation.
+deg = -35;
+t = deg*pi/180;
+Rx = [cos(t),-sin(t);sin(t),cos(t)];
+rotXy = Rx*[xr;yr];
+xr = rotXy(1)+0.7;
+yr = rotXy(2)+0.97;
 zr = d;
 end
 

@@ -17,6 +17,8 @@ fprintf('\nLoading Laplacian Info');
 load(fullfile(cFolder,'precalculated','lap10.mat')); % load lap and metalap
 lap(lap==0)=NaN('single');
 Param = load(fullfile(cFolder,'precalculated','calc_param.mat')); % load lap and metalap
+%% Load precalculated anatomy map.
+load(fullfile(cFolder,'precalculated','map.mat')); % load resIm and cMap
 
 %% Points to Pix. (LAPLACIAN DIM ORDER Y,Z,X)
 % transform matrix.
@@ -83,20 +85,25 @@ hAx.YDir = 'normal';
 scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,'white','filled');
 hold on
 scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,'white','filled');
-export_fig(hFig,'Z:\Chip_analysis\AA0100 flatmap.png','m4')
 
-hFig = figure;
-hAx = axes;
-hAx.DataAspectRatio = [1,1,1];
-scatter(swc(:,5),swc(:,3),3,'filled');
-hAx.YDir ='reverse';
-
-hFig = figure;
-hAx = axes;
-hAx.DataAspectRatio = [1,1,1];
-plotSwcFast2D(swcHemi.left,[1,2]); hold on
-plotSwcFast2D(swcHemi.right,[1,2]); hold on
-
-figure
-imshow(lap(:,:,100),[]);
+% hFig = figure;
+% hAx = axes;
+% hAx.DataAspectRatio = [1,1,1];
+% scatter(swc(:,5),swc(:,3),3,'filled');
+% hAx.YDir ='reverse';
+% 
+% hFig = figure;
+% hAx = axes;
+% hAx.DataAspectRatio = [1,1,1];
+% plotSwcFast2D(swcHemi.left,[1,2]); hold on
+% plotSwcFast2D(swcHemi.right,[1,2]); hold on
+% 
+% figure
+% imshow(lap(:,:,100),[]);
+% 
+% hFig = figure;
+% hAx = axes;
+% hAx.DataAspectRatio = [1,1,1];
+% scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,'filled');
+% scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,'filled');
 
