@@ -89,6 +89,7 @@ end
 %% plot.
 hFig = figure;
 hAx = axes;
+hAx2 = axes;
 hAx.DataAspectRatio = [1,1,1];
 imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
 hAx.YDir = 'normal';
@@ -96,6 +97,8 @@ depthMap = jet(10001);
 if depthColor
     scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,depthMap(uint16(swcHemi.left(:,5)+5000)+1,:),'filled');
     scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,depthMap(uint16(swcHemi.right(:,5)+5000)+1,:),'filled');
+    colormap(depthMap)
+    colorbar
 else
     scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,'white','filled');
     scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,'white','filled');
