@@ -1,4 +1,4 @@
-function mapNeuron(neuronId,type,depthColor)
+function mapNeuron(idString,varargin)
 if nargin == 0
     fprintf('\nNo neuron Id provided showing AA0100 as example');
     neuronId = 'AA0100';
@@ -8,18 +8,23 @@ end
 if nargin==1
     type = 'axon';
     depthColor = true;
-end
+    endedit get
 % %% Input Parameters
 % neuronId = 'AA0100';
 % type = 'axon';
-%% Parameters.
-Settings.VoxelSize = [10,10,10];
-Settings.ForceHemisphere = 'Right';
-Settings.Database.TracingsUrl = 'http://ml-ubuntu-test:9661/graphql';
 
+%% Parse input.
+p = inputParser;
+p.addRequired('idString',@(x) ischar(x) && length(x)==6);
+p.addParameter('Type','axon',@(x) ischar(x));
+p.addParameter('Color','depth',@(x) ischar(x) ||( ismatrix(x) && );
+p.parse(idString,varargin{:});
+Inputs = p.Results;
+
+Settings.VoxelSize = [10,10,10];
 %% Load neuron from database.
-fprintf('\nLoading neuron: %s',neuronId);
-neuron = dbFncs.getNeuronfromIdString(neuronId,Settings);
+fprintf('\nLoading neuron: %s',Inputs.idString);
+neuron = getNeuronfromIdString(Inputs.idString);
 
 %% Load pre-generated flat map.
 fprintf('\nLoading Laplacian Info');
@@ -89,7 +94,6 @@ end
 %% plot.
 hFig = figure;
 hAx = axes;
-hAx2 = axes;
 hAx.DataAspectRatio = [1,1,1];
 imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
 hAx.YDir = 'normal';
@@ -97,8 +101,6 @@ depthMap = jet(10001);
 if depthColor
     scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,depthMap(uint16(swcHemi.left(:,5)+5000)+1,:),'filled');
     scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,depthMap(uint16(swcHemi.right(:,5)+5000)+1,:),'filled');
-    colormap(depthMap)
-    colorbar
 else
     scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,'white','filled');
     scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,'white','filled');

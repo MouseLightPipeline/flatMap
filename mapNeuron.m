@@ -1,25 +1,17 @@
-function mapNeuron(neuronId,type,depthColor)
-if nargin == 0
-    fprintf('\nNo neuron Id provided showing AA0100 as example');
-    neuronId = 'AA0100';
-    type = 'axon';
-    depthColor = true;
-end
-if nargin==1
-    type = 'axon';
-    depthColor = true;
-end
-% %% Input Parameters
-% neuronId = 'AA0100';
-% type = 'axon';
-%% Parameters.
-Settings.VoxelSize = [10,10,10];
-Settings.ForceHemisphere = 'Right';
-Settings.Database.TracingsUrl = 'http://ml-ubuntu-test:9661/graphql';
+function [outputData]=mapNeuron(idString,varargin)
+%% Parse input.
+p = inputParser;
+p.addRequired('idString',@(x) ischar(x) && length(x)==6);
+p.addParameter('Type','axon',@(x) ischar(x));
+p.addParameter('Color','depth',@(x) ischar(x) ||( ismatrix(x) && all(size(x)==[1,3])));
+p.addParameter('Output',true,@(x) islogical(x));
+p.parse(idString,varargin{:});
+Inputs = p.Results;
 
+Settings.VoxelSize = [10,10,10];
 %% Load neuron from database.
-fprintf('\nLoading neuron: %s',neuronId);
-neuron = dbFncs.getNeuronfromIdString(neuronId,Settings);
+fprintf('\nLoading neuron: %s',Inputs.idString);
+neuron = getNeuronfromIdString(Inputs.idString);
 
 %% Load pre-generated flat map.
 fprintf('\nLoading Laplacian Info');
@@ -28,7 +20,7 @@ load(fullfile(cFolder,'precalculated','lap10.mat')); % load lap and metalap
 lap(lap==0)=NaN('single');
 Param = load(fullfile(cFolder,'precalculated','calc_param.mat')); % load lap and metalap
 %% Load precalculated anatomy map.
-load(fullfile(cFolder,'precalculated','map.mat')); % load resIm and cMap
+load(fullfile(cFolder,'precalculated','anatomyFlatMap.mat')); % load resIm and cMap
 
 %% Points to Pix. (LAPLACIAN DIM ORDER Y,Z,X)
 % transform matrix.
@@ -36,7 +28,7 @@ tMat = eye(4,4);
 for iDim=1:3
     tMat(iDim,iDim) = 1/Settings.VoxelSize(iDim);
 end
-swc = [[neuron.(type).sampleNumber]' [neuron.(type).structureIdValue]' [neuron.(type).y]' [neuron.(type).z]' [neuron.(type).x]' ones(size(neuron.axon,1),1) [neuron.(type).parentNumber]'];
+swc = [[neuron.(Inputs.Type).sampleNumber]' [neuron.(Inputs.Type).structureIdValue]' [neuron.(Inputs.Type).y]' [neuron.(Inputs.Type).z]' [neuron.(Inputs.Type).x]' ones(size(neuron.(Inputs.Type),1),1) [neuron.(Inputs.Type).parentNumber]'];
 % get indices in laplacian matrix.
 pixPoints = round([swc(:,3:5),zeros(size(swc,1),1)]*tMat);
 pixPoints = pixPoints(:,1:3);
@@ -87,19 +79,24 @@ for iHemi = {'left','right'}
     end
 end
 %% plot.
-hFig = figure;
-hAx = axes;
-hAx.DataAspectRatio = [1,1,1];
-imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
-hAx.YDir = 'normal';
-depthMap = jet(10001);
-if depthColor
-    scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,depthMap(uint16(swcHemi.left(:,5)+5000)+1,:),'filled');
-    scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,depthMap(uint16(swcHemi.right(:,5)+5000)+1,:),'filled');
-else
-    scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,'white','filled');
-    scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,'white','filled');
+if Inputs.Output
+    hFig = figure;
+    hAx = axes;
+    hAx.DataAspectRatio = [1,1,1];
+    imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
+    hAx.YDir = 'normal';
+    depthMap = jet(10001);
+    if strcmpi(Inputs.Color,'depth')
+        scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,depthMap(uint16(swcHemi.left(:,5)+5000)+1,:),'filled');
+        scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,depthMap(uint16(swcHemi.right(:,5)+5000)+1,:),'filled');
+    else
+        scatter(swcHemi.left(:,3),swcHemi.left(:,4),10,Inputs.Color,'filled');
+        scatter(swcHemi.right(:,3),swcHemi.right(:,4),10,Inputs.Color,'filled');
+    end
 end
+
+%% Prep Output.
+outputData = [swcHemi.left(:,3:5);swcHemi.right(:,3:5)];
 xlabel('Left-Right axis');
 ylabel('Posterior-Anterior axis');
 fprintf('\nDone!\n');

@@ -7,7 +7,7 @@ anatomyList = {'Anterior cingulate area','Agranular insular area','Auditory area
 % anatomyList = {'Isocortex'};
 pixSpacing = [50,50,50];
 sliceRange = [-5000,5000];
-resBin = [0.01,0.01];
+resBin = [0.015,0.015];
 imageRange = [-1.5,1.5;0,1.6];
 %% Load mesh info.
 fprintf('\nLoading allen Mesh info');
@@ -94,73 +94,30 @@ for iPix = 1:size(uniPix,1)
     ind = listOrder ==iPix;
     resIm(uniPix(iPix,1),uniPix(iPix,2)) = mode(mappedOnt(ind,4));
 end
-
-save('map.mat','resIm','R','cMap');
+% 
+% save('map.mat','resIm','R','cMap');
 
 %% Plot result.
 hFig = figure;
 hAx = axes;
 imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
 hAx.YDir = 'normal';
+hAx.DataAspectRatio = [1,1,1];
+
+%%
+resIm = imfill(resIm);
+save('map.mat','resIm','R','cMap');
+
+
+hFig = figure;
+hAx = axes;
+imshow(resIm,R,[1,730],'ColorMap',cMap);hold on;
+hAx.YDir = 'normal';
+hAx.DataAspectRatio = [1,1,1];
+
 
 hFig = figure;
 hAx = axes;
 imshow(resIm,R,[1,730],'ColorMap',jet(730));hold on;
 hAx.YDir = 'normal';
 
-round(cMap(56,:)*256)
-
-figure
-hAx = gca;
-hAx.DataAspectRatio = [1,1,1];
-scatter(mappedOnt(:,1),mappedOnt(:,2)); hold on
-scatter(-mappedOnt(:,1),mappedOnt(:,2)); hold on
-
-
-figure
-scatter((mappedOnt(:,1)+1)*500,(mappedOnt(:,2)+1)*500);
-hold on
-scatter(Param.bdy(:,2),Param.bdy(:,1));
-figure
-imshow(lap(:,:,100),[])
-
-figure
-imshow(ontIm(:,:,20),[])
-
-% bank = [];
-% downSample =10;
-% for iFrame = 1:size(lap,3)
-%     iFrame
-%     I = imresize(lap(:,:,iFrame),1/downSample);
-%     [i,j]= find(~isnan(I));
-%     i=i*downSample;
-%     j=j*downSample;
-%     if ~isempty(i)
-%         new = zeros(size(i,1),3);
-%         for iNode = 1:size(i,1)
-%             [ xr, yr,zr ] = transformAllenPix2Flat( i(iNode),j(iNode), iFrame,...
-%                     Param.coeff1, Param.coeff2, Param.points3d, lap);
-%             new(iNode,:) = [ xr, yr,zr ];
-%         end
-%         bank = [bank;new];
-%     end
-% end
-% 
-% % figure
-% % imshow(I,[]);
-% 
-% figure
-% scatter(bank(:,1),bank(:,2));
-% 
-% % create rotation matrix.
-% deg = -35
-% t = deg*pi/180
-% Rx = [cos(t),-sin(t);sin(t),cos(t)];
-% bankRot = [Rx*bank(:,1:2)']';
-% figure
-% scatter(bankRot(:,1),bankRot(:,2));
-% 
-% hold on
-% scatter(Param.bdy(:,1), Param.bdy(:,2), 'b', 'LineWidth', 2)
-% 
-% save('bank.mat','bank');
